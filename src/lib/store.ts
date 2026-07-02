@@ -5,7 +5,7 @@ import crypto from "crypto";
 const root = path.join(process.cwd(), "data");
 const blobs = path.join(root, "blobs");
 
-export const MAX_BYTES = 25 * 1024 * 1024;
+export const MAX_BYTES = 100 * 1024 * 1024;
 const TTLS: Record<string, number> = {
   "1h": 3600e3,
   "1d": 86400e3,

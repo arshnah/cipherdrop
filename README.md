@@ -18,7 +18,7 @@ npm install
 npm run dev
 ```
 
-Blobs live on disk under `data/` (gitignored). Max upload is 25 MB.
+Blobs live on disk under `data/` (gitignored). Max upload is 100 MB.
 
 ## Stack
 

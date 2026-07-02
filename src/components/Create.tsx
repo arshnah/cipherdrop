@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { FileUp, Type, Link2, Copy, Check, Loader2, Flame, X } from "lucide-react";
 import { makeKey, exportKey, pack, seal, type Meta } from "@/lib/crypto";
 
-const MAX = 25 * 1024 * 1024;
+const MAX = 100 * 1024 * 1024;
 type Tab = "text" | "file";
 
 export default function Create() {
@@ -31,7 +31,7 @@ export default function Create() {
         meta = { kind: "text" };
         data = new TextEncoder().encode(text);
       } else {
-        if (file!.size > MAX) throw new Error("that file is over the 25 MB limit");
+        if (file!.size > MAX) throw new Error("that file is over the 100 MB limit");
         meta = { kind: "file", name: file!.name, mime: file!.type || "application/octet-stream" };
         data = new Uint8Array(await file!.arrayBuffer());
       }
@@ -125,7 +125,7 @@ export default function Create() {
           <div className="text-center">
             <FileUp size={22} className="mx-auto text-faint group-hover:text-accent transition" />
             <div className="mt-2 text-[13.5px] text-muted">click to pick a file</div>
-            <div className="text-[12px] text-faint font-mono mt-0.5">up to 25 MB</div>
+            <div className="text-[12px] text-faint font-mono mt-0.5">up to 100 MB</div>
           </div>
         </button>
       )}
