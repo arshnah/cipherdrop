@@ -24,7 +24,10 @@ export default function Home() {
           <span className="font-mono font-semibold text-[15px] tracking-tight flex items-center gap-2.5">
             <span className="w-3 h-3 bg-accent" /> cipherdrop
           </span>
-          <a href="https://github.com/arshnah/cipherdrop" target="_blank" rel="noopener noreferrer" className="font-mono flex items-center gap-1.5 text-[13px] text-muted hover:text-ink transition"><Github size={15} /> source</a>
+          <div className="flex items-center gap-5 font-mono text-[13px]">
+            <a href="/veil" className="text-muted hover:text-ink transition">hide in an image</a>
+            <a href="https://github.com/arshnah/cipherdrop" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-muted hover:text-ink transition"><Github size={15} /> source</a>
+          </div>
         </nav>
 
         <header className="pt-14 pb-10 grid lg:grid-cols-[1fr_300px] gap-x-12 gap-y-9 items-end">

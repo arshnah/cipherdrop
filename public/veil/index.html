@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>veil · hide a message inside a picture · cipherdrop</title>
+  <meta name="description" content="Hide an encrypted message inside an ordinary image. Everything happens in your browser, the picture looks untouched, and only someone with the password can pull the words back out." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/veil/styles.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="wrap">
+    <nav>
+      <span class="brand">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M4 20 20 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        veil <span class="sub">· part of cipherdrop</span>
+      </span>
+      <a class="src" href="/">back to cipherdrop</a>
+    </nav>
+
+    <header class="hero">
+      <p class="kick">client-side · nothing leaves your device</p>
+      <h1>hide a message<br/>inside a picture.</h1>
+      <p class="lede">the words get encrypted in your browser and tucked into the pixels of an ordinary image. the picture looks exactly the same. only someone with the password, and the hunch to look, gets them back out.</p>
+    </header>
+
+    <section class="tool">
+      <div class="tabs">
+        <button class="tab is-on" data-tab="hide" type="button">hide</button>
+        <button class="tab" data-tab="reveal" type="button">reveal</button>
+      </div>
+
+      <div class="pane is-on" data-pane="hide">
+        <button class="drop" id="hideDrop" type="button">
+          <input type="file" accept="image/png,image/jpeg,image/webp,image/*" id="hideFile" hidden />
+          <div class="drop-empty" id="hideEmpty">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="9.5" r="1.6" stroke="currentColor" stroke-width="1.5"/><path d="m4 17 5-5 4 4 3-3 4 4" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <span>drop a cover image, or click</span>
+            <span class="hint">png keeps the secret. jpg would crush it, so it gets converted.</span>
+          </div>
+          <div class="frame" id="hidePreviewWrap" hidden><img id="hidePreview" alt="cover image preview" /></div>
+        </button>
+
+        <textarea id="hideMsg" placeholder="the message only they should find"></textarea>
+        <input type="password" id="hidePass" placeholder="password (optional, encrypts it first)" autocomplete="off" />
+
+        <div class="meter"><span id="hideBar"></span></div>
+        <div class="meter-label" id="hideCap">pick an image to see how much fits.</div>
+
+        <button class="go" id="hideGo" type="button" disabled>hide it</button>
+        <p class="err" id="hideErr" hidden></p>
+
+        <div class="result" id="hideResult" hidden>
+          <div class="frame done"><img id="hideOut" alt="image with the hidden message" /></div>
+          <div class="result-row">
+            <a class="dl" id="hideDl" download="veil.png">download the image</a>
+            <span class="note">looks identical. the secret rides in the pixels.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane" data-pane="reveal">
+        <button class="drop" id="revDrop" type="button">
+          <input type="file" accept="image/png,image/webp,image/*" id="revFile" hidden />
+          <div class="drop-empty" id="revEmpty">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+            <span>drop the image someone sent you</span>
+            <span class="hint">it looks like any other picture. that is the point.</span>
+          </div>
+          <div class="frame" id="revPreviewWrap" hidden><img id="revPreview" alt="image being scanned" /><span class="scan" id="revScan"></span></div>
+        </button>
+
+        <input type="password" id="revPass" placeholder="password (if it was locked with one)" autocomplete="off" />
+        <button class="go" id="revGo" type="button" disabled>reveal the message</button>
+        <p class="err" id="revErr" hidden></p>
+
+        <div class="result" id="revResult" hidden>
+          <div class="message" id="revMsg"></div>
+          <button class="copy" id="revCopy" type="button">copy</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="how">
+      <p class="how-title">how it works</p>
+      <ol>
+        <li><b>encrypt.</b> if you set a password, the message is sealed with AES-GCM, keyed off your passphrase, before anything else happens.</li>
+        <li><b>embed.</b> every bit of that ciphertext is written into the lowest bit of the image's colour channels. the shift is one step per channel, invisible to the eye.</li>
+        <li><b>ship.</b> you get a normal-looking png. send it however you send pictures. the words are not in the filename or the metadata, they are in the grain.</li>
+        <li><b>reveal.</b> the other side drops it here, types the password, and the same math runs backwards. no server ever sees the image or the message.</li>
+      </ol>
+    </section>
+
+    <footer>
+      <span>part of <a href="/">cipherdrop</a> · made by <a href="https://arshnah.in" target="_blank" rel="noopener noreferrer">arshdeep singh</a></span>
+      <span>MIT</span>
+    </footer>
+  </div>
+  <script src="/veil/app.js"></script>
+</body>
+</html>
