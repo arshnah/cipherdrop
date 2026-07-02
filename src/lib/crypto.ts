@@ -1,4 +1,4 @@
-export interface Meta { kind: "text" | "file"; name?: string; mime?: string; }
+export interface Meta { kind: "text" | "file"; name?: string; mime?: string; lang?: string; }
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();

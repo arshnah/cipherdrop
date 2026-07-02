@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { FileUp, Type, Link2, Copy, Check, Loader2, Flame, X } from "lucide-react";
+import { FileUp, Type, Link2, Copy, Check, Loader2, Flame, X, Code } from "lucide-react";
 import { makeKey, exportKey, pack, seal, type Meta } from "@/lib/crypto";
 
 const MAX = 100 * 1024 * 1024;
@@ -12,6 +12,7 @@ export default function Create() {
   const [file, setFile] = useState<File | null>(null);
   const [ttl, setTtl] = useState("1d");
   const [burn, setBurn] = useState(false);
+  const [code, setCode] = useState(false);
   const [busy, setBusy] = useState(false);
   const [link, setLink] = useState("");
   const [err, setErr] = useState("");
@@ -28,7 +29,7 @@ export default function Create() {
       let meta: Meta;
       let data: Uint8Array;
       if (tab === "text") {
-        meta = { kind: "text" };
+        meta = code ? { kind: "text", lang: "auto" } : { kind: "text" };
         data = new TextEncoder().encode(text);
       } else {
         if (file!.size > MAX) throw new Error("that file is over the 100 MB limit");
@@ -107,7 +108,7 @@ export default function Create() {
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="paste a secret, a note, a token, anything"
+          placeholder={code ? "paste code, it gets highlighted when someone opens it" : "paste a secret, a note, a token, anything"}
           className="w-full h-44 resize-none bg-bg border border-line rounded-xl px-4 py-3.5 text-[14px] leading-[1.6] text-ink placeholder:text-faint outline-none focus:border-accent/50 transition font-mono"
         />
       ) : file ? (
@@ -140,6 +141,11 @@ export default function Create() {
             <option value="7d">7 days</option>
           </select>
         </label>
+        {tab === "text" && (
+          <button onClick={() => setCode(!code)} className={`flex items-center gap-1.5 text-[13px] px-3 py-1.5 rounded-lg border transition ${code ? "border-accent/50 text-accent bg-accent/10" : "border-line text-muted hover:text-ink"}`}>
+            <Code size={14} /> code
+          </button>
+        )}
         <button onClick={() => setBurn(!burn)} className={`flex items-center gap-1.5 text-[13px] px-3 py-1.5 rounded-lg border transition ${burn ? "border-warn/50 text-warn bg-warn/10" : "border-line text-muted hover:text-ink"}`}>
           <Flame size={14} /> burn after read
         </button>

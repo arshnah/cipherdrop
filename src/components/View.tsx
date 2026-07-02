@@ -5,7 +5,7 @@ import { importKey, open, unpack, type Meta } from "@/lib/crypto";
 
 type State =
   | { s: "loading" }
-  | { s: "text"; text: string; burned: boolean }
+  | { s: "text"; text: string; html?: string; burned: boolean }
   | { s: "file"; meta: Meta; url: string; size: number; burned: boolean }
   | { s: "error"; kind: "nokey" | "notfound" | "gone" | "badkey" };
 
@@ -35,7 +35,13 @@ export default function View({ id }: { id: string }) {
       try {
         const { meta, data } = unpack(await open(key, blob));
         if (meta.kind === "text") {
-          setSt({ s: "text", text: new TextDecoder().decode(data), burned });
+          const text = new TextDecoder().decode(data);
+          if (meta.lang) {
+            const { highlight } = await import("@/lib/highlight");
+            setSt({ s: "text", text, html: highlight(text).html, burned });
+          } else {
+            setSt({ s: "text", text, burned });
+          }
         } else {
           const url = URL.createObjectURL(new Blob([data as BlobPart], { type: meta.mime || "application/octet-stream" }));
           setSt({ s: "file", meta, url, size: data.length, burned });
@@ -84,9 +90,13 @@ export default function View({ id }: { id: string }) {
       )}
       {st.s === "text" ? (
         <>
-          <div className="bg-bg border border-line rounded-xl px-4 py-3.5 font-mono text-[13.5px] leading-[1.6] text-ink whitespace-pre-wrap break-words max-h-[60vh] overflow-auto">
-            {st.text}
-          </div>
+          {st.html ? (
+            <CodeBlock html={st.html} text={st.text} />
+          ) : (
+            <div className="bg-bg border border-line rounded-xl px-4 py-3.5 font-mono text-[13.5px] leading-[1.6] text-ink whitespace-pre-wrap break-words max-h-[60vh] overflow-auto">
+              {st.text}
+            </div>
+          )}
           <div className="mt-4 flex items-center gap-3">
             <button onClick={() => copy(st.text)} className="flex items-center gap-2 bg-accent text-bg font-medium text-[13.5px] px-4 py-2 rounded-lg hover:brightness-110 transition">
               {copied ? <><Check size={15} /> copied</> : <><Copy size={15} /> copy</>}
@@ -106,6 +116,18 @@ export default function View({ id }: { id: string }) {
         </div>
       )}
     </Shell>
+  );
+}
+
+function CodeBlock({ html, text }: { html: string; text: string }) {
+  const gutter = text.replace(/\n$/, "").split("\n").map((_, i) => i + 1).join("\n");
+  return (
+    <div className="bg-bg border border-line rounded-xl overflow-auto max-h-[60vh]">
+      <div className="flex min-w-max text-[13px] leading-[1.6] font-mono">
+        <div className="sticky left-0 shrink-0 select-none text-right bg-bg text-faint py-3.5 pl-4 pr-3 border-r border-line whitespace-pre">{gutter}</div>
+        <pre className="hljs bg-transparent py-3.5 px-4 whitespace-pre"><code dangerouslySetInnerHTML={{ __html: html }} /></pre>
+      </div>
+    </div>
   );
 }
 

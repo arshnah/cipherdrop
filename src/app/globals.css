@@ -6,3 +6,16 @@
 html,body{ padding:0; margin:0; }
 body{ background:#0a0c0b; color:#eef2f0; -webkit-font-smoothing:antialiased; }
 ::selection{ background:#34d399; color:#0a0c0b; }
+
+.hljs{ color:#eef2f0; }
+.hljs-comment,.hljs-quote{ color:#545e58; font-style:italic; }
+.hljs-keyword,.hljs-selector-tag,.hljs-literal,.hljs-section,.hljs-link{ color:#34d399; }
+.hljs-string,.hljs-attr,.hljs-template-tag,.hljs-addition{ color:#e0a35a; }
+.hljs-number,.hljs-symbol,.hljs-bullet{ color:#7cd3b0; }
+.hljs-title,.hljs-name,.hljs-type,.hljs-selector-id,.hljs-selector-class{ color:#9fd0ff; }
+.hljs-attribute,.hljs-variable,.hljs-template-variable{ color:#b3e3cf; }
+.hljs-built_in,.hljs-class .hljs-title{ color:#6ec9a8; }
+.hljs-meta,.hljs-tag{ color:#8a948e; }
+.hljs-deletion{ color:#f47171; }
+.hljs-emphasis{ font-style:italic; }
+.hljs-strong{ font-weight:600; }
