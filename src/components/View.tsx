@@ -75,7 +75,7 @@ export default function View({ id }: { id: string }) {
           <ShieldAlert size={26} className="mx-auto text-bad mb-4" />
           <h2 className="text-[17px] font-semibold">{map.t}</h2>
           <p className="mt-2 max-w-[42ch] mx-auto text-[13.5px] text-muted leading-[1.55]">{map.d}</p>
-          <a href="/" className="mt-6 inline-flex items-center gap-1.5 text-[13.5px] text-accent hover:brightness-110 transition"><ArrowLeft size={15} /> make your own drop</a>
+          <a href="/cipherdrop" className="mt-6 inline-flex items-center gap-1.5 text-[13.5px] text-accent hover:brightness-110 transition"><ArrowLeft size={15} /> make your own drop</a>
         </div>
       </Shell>
     );
@@ -101,7 +101,7 @@ export default function View({ id }: { id: string }) {
             <button onClick={() => copy(st.text)} className="flex items-center gap-2 bg-accent text-bg font-medium text-[13.5px] px-4 py-2 rounded-lg hover:brightness-110 transition">
               {copied ? <><Check size={15} /> copied</> : <><Copy size={15} /> copy</>}
             </button>
-            <a href="/" className="ml-auto text-[13px] text-muted hover:text-ink transition">make your own</a>
+            <a href="/cipherdrop" className="ml-auto text-[13px] text-muted hover:text-ink transition">make your own</a>
           </div>
         </>
       ) : (
@@ -112,7 +112,7 @@ export default function View({ id }: { id: string }) {
           <a href={st.url} download={st.meta.name} className="mt-5 inline-flex items-center gap-2 bg-accent text-bg font-medium text-[13.5px] px-5 py-2.5 rounded-xl hover:brightness-110 transition">
             <Download size={16} /> download
           </a>
-          <div className="mt-5"><a href="/" className="text-[13px] text-muted hover:text-ink transition">make your own</a></div>
+          <div className="mt-5"><a href="/cipherdrop" className="text-[13px] text-muted hover:text-ink transition">make your own</a></div>
         </div>
       )}
     </Shell>
@@ -136,7 +136,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     <main className="min-h-screen">
       <div className="max-w-[720px] mx-auto px-6">
         <nav className="py-6">
-          <a href="/" className="font-bold text-[18px] tracking-tight flex items-center gap-2 w-fit">
+          <a href="/cipherdrop" className="font-bold text-[18px] tracking-tight flex items-center gap-2 w-fit">
             <span className="w-6 h-6 rounded-md bg-accent/20 grid place-items-center"><Shield size={13} className="text-accent" /></span>
             cipherdrop
           </a>

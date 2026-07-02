@@ -1,85 +1,51 @@
-import Create from "@/components/Create";
-import { Github } from "lucide-react";
+import Link from "next/link";
+import { Lock, Eye, Github, ArrowUpRight, Plus } from "lucide-react";
 
-const spec: [string, string][] = [
-  ["cipher", "AES-GCM 256"],
-  ["key", "in the URL #fragment"],
-  ["server", "ciphertext only"],
-  ["expiry", "1h · 1d · 7d"],
-  ["burn", "delete on first read"],
-  ["max", "100 MB"],
+const tools = [
+  { href: "/cipherdrop", name: "cipherdrop", tag: "encrypted drops", a: "#34d399", Icon: Lock,
+    desc: "share a file or a note the server cannot read. it is encrypted here and the key rides in the link, never the wire." },
+  { href: "/veil", name: "veil", tag: "steganography", a: "#a78bfa", Icon: Eye,
+    desc: "hide an encrypted message inside the pixels of an ordinary image. the picture looks untouched." },
 ];
 
-const why: [string, string][] = [
-  ["the key never leaves", "it is generated on this device and lives after the # in the link, which browsers never send to a server."],
-  ["the server holds gibberish", "only ciphertext ever lands on disk. if it leaked tomorrow there would be nothing readable on it."],
-  ["gone when you want", "set an expiry or burn on the first read. expired drops get swept off disk, not just hidden."],
-];
-
-export default function Home() {
+export default function Drop() {
   return (
     <main className="min-h-screen">
-      <div className="mx-auto max-w-[1060px] px-6">
+      <div className="mx-auto max-w-[860px] px-6">
         <nav className="flex items-center justify-between py-6">
-          <span className="font-mono font-semibold text-[15px] tracking-tight flex items-center gap-2.5">
-            <span className="w-3 h-3 bg-accent" /> cipherdrop
+          <span className="font-semibold text-[17px] tracking-tight flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-ink" /> drop
           </span>
-          <div className="flex items-center gap-5 font-mono text-[13px]">
-            <a href="/veil" className="text-muted hover:text-ink transition">hide in an image</a>
-            <a href="https://github.com/arshnah/cipherdrop" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-muted hover:text-ink transition"><Github size={15} /> source</a>
-          </div>
+          <a href="https://github.com/arshnah" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[13px] text-muted hover:text-ink transition"><Github size={15} /> source</a>
         </nav>
 
-        <header className="pt-14 pb-10 grid lg:grid-cols-[1fr_300px] gap-x-12 gap-y-9 items-end">
-          <div>
-            <div className="font-mono text-[12.5px] text-faint mb-6">
-              <span className="text-accent">cipherdrop</span> ~ $ share --encrypt --burn
-            </div>
-            <h1 className="font-mono font-bold lowercase text-[clamp(30px,5.4vw,52px)] leading-[1.05] tracking-[-0.02em]">
-              send a file or note<br className="hidden sm:block" /> the server cannot read<span className="cursor" />
-            </h1>
-            <p className="mt-6 max-w-[50ch] text-[16.5px] text-muted leading-[1.6]">
-              it is encrypted in your browser before it leaves. the key rides in the link fragment, which never reaches the server, so all it ever stores is scrambled bytes it cannot read.
-            </p>
-          </div>
-          <div className="font-mono text-[12.5px] border border-line rounded-lg divide-y divide-line overflow-hidden">
-            {spec.map(([k, v]) => (
-              <div key={k} className="flex items-center justify-between px-3.5 py-2 bg-surf/40">
-                <span className="text-faint">{k}</span>
-                <span className="text-ink">{v}</span>
-              </div>
-            ))}
-          </div>
+        <header className="pt-16 pb-12">
+          <h1 className="text-[clamp(42px,9vw,80px)] font-bold leading-[0.95] tracking-[-0.04em]">drop</h1>
+          <p className="mt-6 max-w-[46ch] text-[17px] text-muted leading-[1.6]">a small shelf of privacy tools that run entirely in your browser. no accounts, no server reading your stuff. pick one.</p>
         </header>
 
-        <section className="pb-16">
-          <div className="rounded-t-lg border border-b-0 border-line bg-surf2/40 flex items-center gap-2 px-4 py-2.5">
-            <span className="flex gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-bad/70" />
-              <span className="w-2.5 h-2.5 rounded-full bg-warn/70" />
-              <span className="w-2.5 h-2.5 rounded-full bg-accent/70" />
-            </span>
-            <span className="font-mono text-[12px] text-faint ml-1.5">~/cipherdrop</span>
-            <span className="ml-auto font-mono text-[11.5px] text-faint hidden sm:block">encrypt → link → decrypt</span>
-          </div>
-          <Create />
-          <p className="mt-3 font-mono text-[12px] text-faint">the key lives after the # in your link and is generated on this device, never sent.</p>
-        </section>
-
-        <section className="pb-16 border-t border-line pt-11">
-          <div className="font-mono text-[12.5px] text-faint mb-7">$ why cipherdrop</div>
-          <div className="space-y-5 max-w-[680px]">
-            {why.map(([t, d]) => (
-              <div key={t} className="flex flex-col sm:flex-row sm:gap-5">
-                <div className="font-mono text-[13.5px] text-accent shrink-0 sm:w-[210px]">{"> "}{t}</div>
-                <p className="text-[13.5px] text-muted leading-[1.55]">{d}</p>
-              </div>
-            ))}
+        <section className="grid sm:grid-cols-2 gap-4 pb-16">
+          {tools.map((t) => (
+            <Link key={t.href} href={t.href} style={{ "--a": t.a } as React.CSSProperties}
+              className="group relative block rounded-2xl border border-line bg-surf p-6 transition duration-200 hover:-translate-y-1 hover:border-[color:var(--a)]">
+              <ArrowUpRight size={18} className="absolute top-5 right-5 text-faint group-hover:text-[color:var(--a)] transition" />
+              <span className="inline-grid place-items-center w-11 h-11 rounded-xl mb-5" style={{ background: t.a + "1f", color: t.a }}>
+                <t.Icon size={20} />
+              </span>
+              <div className="text-[19px] font-semibold tracking-tight">{t.name}</div>
+              <div className="font-mono text-[12px] mt-0.5" style={{ color: t.a }}>{t.tag}</div>
+              <p className="mt-3 text-[13.5px] text-muted leading-[1.55] max-w-[34ch]">{t.desc}</p>
+            </Link>
+          ))}
+          <div className="rounded-2xl border border-dashed border-line p-6 grid place-content-center text-center min-h-[196px]">
+            <Plus size={18} className="mx-auto text-faint mb-2" />
+            <div className="text-[13.5px] text-faint">more tools soon</div>
+            <div className="font-mono text-[11.5px] text-faint mt-1">this shelf keeps growing</div>
           </div>
         </section>
 
         <footer className="py-9 border-t border-line font-mono text-[12.5px] text-faint flex items-center justify-between">
-          <span>made by <a href="https://arshnah.vercel.app" className="text-muted hover:text-ink transition">arshdeep singh</a></span>
+          <span>made by <a href="https://arshnah.in" className="text-muted hover:text-ink transition">arshdeep singh</a> · one vps, no black boxes</span>
           <span>MIT</span>
         </footer>
       </div>
