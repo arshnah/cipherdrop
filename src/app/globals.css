@@ -19,3 +19,11 @@ body{ background:#0a0c0b; color:#eef2f0; -webkit-font-smoothing:antialiased; }
 .hljs-deletion{ color:#f47171; }
 .hljs-emphasis{ font-style:italic; }
 .hljs-strong{ font-weight:600; }
+
+@keyframes blink{ 0%,55%{ opacity:1 } 56%,100%{ opacity:0 } }
+.cursor{ display:inline-block; width:0.55em; height:1.02em; margin-left:0.08em; vertical-align:-0.16em; background:#34d399; animation:blink 1.15s step-end infinite; }
+
+body::after{
+  content:""; position:fixed; inset:0; z-index:9999; pointer-events:none; opacity:0.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}

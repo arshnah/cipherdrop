@@ -70,7 +70,7 @@ export default function Create() {
 
   if (link) {
     return (
-      <div className="rounded-[18px] border border-line bg-surf p-6">
+      <div className="rounded-b-lg border border-t-0 border-line bg-surf p-6">
         <div className="flex items-center gap-2 text-accent text-[13px] font-mono mb-4">
           <Link2 size={15} /> your link is ready
         </div>
@@ -94,7 +94,7 @@ export default function Create() {
   }
 
   return (
-    <div className="rounded-[18px] border border-line bg-surf p-6">
+    <div className="rounded-b-lg border border-t-0 border-line bg-surf p-6">
       <div className="flex gap-1 mb-5 p-1 bg-bg rounded-xl w-fit">
         <button onClick={() => setTab("text")} className={`flex items-center gap-1.5 text-[13.5px] px-3.5 py-1.5 rounded-lg transition ${tab === "text" ? "bg-surf2 text-ink" : "text-muted hover:text-ink"}`}>
           <Type size={14} /> text
