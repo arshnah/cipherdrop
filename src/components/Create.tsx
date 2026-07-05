@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { FileUp, Type, Link2, Copy, Check, Loader2, Flame, X, Code } from "lucide-react";
-import { makeKey, exportKey, pack, seal, type Meta } from "@/lib/crypto";
+import { makeKey, exportKey, wrapKeyWithPass, pack, seal, type Meta } from "@/lib/crypto";
 
 const MAX = 100 * 1024 * 1024;
 type Tab = "text" | "file";
@@ -12,6 +12,7 @@ export default function Create() {
   const [file, setFile] = useState<File | null>(null);
   const [ttl, setTtl] = useState("1d");
   const [burn, setBurn] = useState(false);
+  const [pass, setPass] = useState("");
   const [code, setCode] = useState(false);
   const [busy, setBusy] = useState(false);
   const [link, setLink] = useState("");
@@ -48,7 +49,7 @@ export default function Create() {
         throw new Error(j.error === "too_big" ? "that file is too large" : "upload failed, try again");
       }
       const { id } = await res.json();
-      const k = await exportKey(key);
+      const k = pass.trim() ? await wrapKeyWithPass(key, pass.trim()) : await exportKey(key);
       setLink(`${location.origin}/d/${id}#${k}`);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "something went wrong");
@@ -64,7 +65,7 @@ export default function Create() {
   }
 
   function reset() {
-    setLink(""); setText(""); setFile(null); setErr(""); setCopied(false);
+    setLink(""); setText(""); setFile(null); setErr(""); setCopied(false); setPass("");
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -84,6 +85,7 @@ export default function Create() {
         </div>
         <p className="mt-4 text-[13px] text-muted leading-[1.55]">
           the part after <span className="font-mono text-ink">#</span> is the key. it never reached the server, so keep the whole link together. {burn ? "anyone with the link can open it once, then it is gone." : "anyone with the link can open it until it expires."}
+          {pass.trim() && " they will also need the passphrase you set — send it separately."}
         </p>
         <div className="mt-5 flex items-center gap-3 text-[13px]">
           <span className="text-faint font-mono">expires in {ttl}{burn ? " · burns on open" : ""}</span>
@@ -131,6 +133,14 @@ export default function Create() {
         </button>
       )}
       <input ref={fileRef} type="file" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+
+      <input
+        type="password"
+        value={pass}
+        onChange={(e) => setPass(e.target.value)}
+        placeholder="passphrase (optional, adds a second lock)"
+        className="mt-4 w-full bg-bg border border-line rounded-xl px-4 py-2.5 text-[13.5px] text-ink placeholder:text-faint outline-none focus:border-accent/50 transition font-mono"
+      />
 
       <div className="mt-5 flex flex-wrap items-center gap-4">
         <label className="flex items-center gap-2 text-[13px] text-muted">

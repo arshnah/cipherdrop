@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Copy, Check, Download, Loader2, ShieldAlert, Shield, Flame, ArrowLeft } from "lucide-react";
-import { importKey, open, unpack, type Meta } from "@/lib/crypto";
+import { Copy, Check, Download, Loader2, ShieldAlert, Shield, Flame, ArrowLeft, Lock } from "lucide-react";
+import { importKey, unwrapKeyWithPass, isPassProtected, open, unpack, type Meta } from "@/lib/crypto";
 
 type State =
   | { s: "loading" }
+  | { s: "pass"; err?: boolean }
   | { s: "text"; text: string; html?: string; burned: boolean }
   | { s: "file"; meta: Meta; url: string; size: number; burned: boolean }
   | { s: "error"; kind: "nokey" | "notfound" | "gone" | "badkey" };
@@ -12,45 +13,69 @@ type State =
 export default function View({ id }: { id: string }) {
   const [st, setSt] = useState<State>({ s: "loading" });
   const [copied, setCopied] = useState(false);
+  const [pass, setPass] = useState("");
   const ran = useRef(false);
+
+  // Fetch the ciphertext and decrypt with the recovered key. Only runs once we
+  // actually have a key — for passphrase drops that means after a correct guess,
+  // so a wrong passphrase never touches (or burns) the drop.
+  async function reveal(key: CryptoKey) {
+    setSt({ s: "loading" });
+    const res = await fetch(`/api/drops/${id}`, { cache: "no-store" });
+    if (res.status === 404) return setSt({ s: "error", kind: "notfound" });
+    if (res.status === 410) return setSt({ s: "error", kind: "gone" });
+    if (!res.ok) return setSt({ s: "error", kind: "notfound" });
+    const burned = res.headers.get("x-burned") === "1";
+    const blob = new Uint8Array(await res.arrayBuffer());
+    try {
+      const { meta, data } = unpack(await open(key, blob));
+      if (meta.kind === "text") {
+        const text = new TextDecoder().decode(data);
+        if (meta.lang) {
+          const { highlight } = await import("@/lib/highlight");
+          setSt({ s: "text", text, html: highlight(text).html, burned });
+        } else {
+          setSt({ s: "text", text, burned });
+        }
+      } else {
+        const url = URL.createObjectURL(new Blob([data as BlobPart], { type: meta.mime || "application/octet-stream" }));
+        setSt({ s: "file", meta, url, size: data.length, burned });
+      }
+    } catch {
+      setSt({ s: "error", kind: "badkey" });
+    }
+  }
 
   useEffect(() => {
     if (ran.current) return;
     ran.current = true;
+    const raw = location.hash.slice(1);
+    if (!raw) return setSt({ s: "error", kind: "nokey" });
+    if (isPassProtected(raw)) return setSt({ s: "pass" }); // wait for the passphrase, don't fetch yet
     (async () => {
-      const raw = location.hash.slice(1);
-      if (!raw) return setSt({ s: "error", kind: "nokey" });
       let key: CryptoKey;
       try {
         key = await importKey(raw);
       } catch {
         return setSt({ s: "error", kind: "badkey" });
       }
-      const res = await fetch(`/api/drops/${id}`, { cache: "no-store" });
-      if (res.status === 404) return setSt({ s: "error", kind: "notfound" });
-      if (res.status === 410) return setSt({ s: "error", kind: "gone" });
-      if (!res.ok) return setSt({ s: "error", kind: "notfound" });
-      const burned = res.headers.get("x-burned") === "1";
-      const blob = new Uint8Array(await res.arrayBuffer());
-      try {
-        const { meta, data } = unpack(await open(key, blob));
-        if (meta.kind === "text") {
-          const text = new TextDecoder().decode(data);
-          if (meta.lang) {
-            const { highlight } = await import("@/lib/highlight");
-            setSt({ s: "text", text, html: highlight(text).html, burned });
-          } else {
-            setSt({ s: "text", text, burned });
-          }
-        } else {
-          const url = URL.createObjectURL(new Blob([data as BlobPart], { type: meta.mime || "application/octet-stream" }));
-          setSt({ s: "file", meta, url, size: data.length, burned });
-        }
-      } catch {
-        setSt({ s: "error", kind: "badkey" });
-      }
+      await reveal(key);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  async function submitPass(e: React.FormEvent) {
+    e.preventDefault();
+    if (!pass) return;
+    const raw = location.hash.slice(1);
+    let key: CryptoKey;
+    try {
+      key = await unwrapKeyWithPass(raw, pass); // fails locally if the passphrase is wrong
+    } catch {
+      return setSt({ s: "pass", err: true });
+    }
+    await reveal(key);
+  }
 
   async function copy(text: string) {
     await navigator.clipboard.writeText(text);
@@ -60,6 +85,32 @@ export default function View({ id }: { id: string }) {
 
   if (st.s === "loading") {
     return <Shell><div className="grid place-items-center h-44 text-muted"><Loader2 size={22} className="animate-spin" /></div></Shell>;
+  }
+
+  if (st.s === "pass") {
+    return (
+      <Shell>
+        <form onSubmit={submitPass} className="text-center py-6">
+          <Lock size={24} className="mx-auto text-accent mb-4" />
+          <h2 className="text-[16px] font-semibold">this drop has a passphrase</h2>
+          <p className="mt-2 max-w-[40ch] mx-auto text-[13px] text-muted leading-[1.55]">the sender locked it with a passphrase. enter it to unlock — nothing is fetched until it is right.</p>
+          <input
+            autoFocus
+            type="password"
+            value={pass}
+            onChange={(e) => setPass(e.target.value)}
+            placeholder="passphrase"
+            className="mt-5 w-full max-w-[320px] bg-bg border border-line rounded-xl px-4 py-2.5 text-[14px] text-ink placeholder:text-faint outline-none focus:border-accent/50 transition font-mono text-center"
+          />
+          {st.err && <p className="mt-3 text-[13px] text-bad">wrong passphrase, try again</p>}
+          <div className="mt-5">
+            <button type="submit" disabled={!pass} className="inline-flex items-center gap-2 bg-accent text-bg font-medium text-[13.5px] px-5 py-2.5 rounded-xl hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed">
+              <Lock size={15} /> unlock
+            </button>
+          </div>
+        </form>
+      </Shell>
+    );
   }
 
   if (st.s === "error") {

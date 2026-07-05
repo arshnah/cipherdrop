@@ -52,3 +52,39 @@ export async function open(key: CryptoKey, blob: Uint8Array): Promise<Uint8Array
   const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: blob.subarray(0, 12) }, key, blob.subarray(12) as BufferSource);
   return new Uint8Array(pt);
 }
+
+// ---- optional passphrase layer ------------------------------------------------
+// The random AES key can be wrapped with a passphrase-derived key. The wrapped
+// key (not the raw one) goes in the URL fragment, prefixed "p.". A wrong
+// passphrase fails to unwrap locally, so the drop is never fetched — burn-after-
+// read is preserved. No passphrase => the fragment is the raw key, exactly as
+// before, so existing links are unaffected.
+
+async function deriveWrapKey(passphrase: string, salt: Uint8Array): Promise<CryptoKey> {
+  const base = await crypto.subtle.importKey("raw", enc.encode(passphrase), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: salt as BufferSource, iterations: 200000, hash: "SHA-256" },
+    base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"],
+  );
+}
+
+export const isPassProtected = (frag: string): boolean => frag.startsWith("p.");
+
+export async function wrapKeyWithPass(key: CryptoKey, passphrase: string): Promise<string> {
+  const raw = new Uint8Array(await crypto.subtle.exportKey("raw", key));
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const wk = await deriveWrapKey(passphrase, salt);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, wk, raw as BufferSource));
+  const payload = new Uint8Array(12 + ct.length);
+  payload.set(iv); payload.set(ct, 12);
+  return `p.${toB64u(salt)}.${toB64u(payload)}`;
+}
+
+export async function unwrapKeyWithPass(frag: string, passphrase: string): Promise<CryptoKey> {
+  const [, saltB, payloadB] = frag.split(".");
+  const salt = fromB64u(saltB), payload = fromB64u(payloadB);
+  const wk = await deriveWrapKey(passphrase, salt);
+  const raw = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: payload.subarray(0, 12) }, wk, payload.subarray(12) as BufferSource));
+  return crypto.subtle.importKey("raw", raw, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+}
