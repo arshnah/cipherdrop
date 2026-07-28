@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 // Two tools, one accent. The old version gave each its own colour, which is how
-// a shelf of two things starts reading as a dashboard — see grain.md rule 6.
+// a shelf of two things starts reading as a dashboard. see grain.md rule 6.
 const tools = [
   {
     href: "/cipherdrop",
@@ -30,7 +30,7 @@ export default function Drop() {
       </nav>
 
       {/* The prompt IS the header. cipherdrop's material is a terminal, and the
-          cursor is the one flourish it gets — grain allows exactly one. */}
+          cursor is the one flourish it gets, and grain allows exactly one. */}
       <header className="pt-14 pb-2">
         <h1 className="font-mono text-[clamp(30px,7vw,44px)] leading-none tracking-tight">
           <span className="text-faint">~/</span>
@@ -46,7 +46,7 @@ export default function Drop() {
       <hr className="my-9 border-0 border-t border-line" />
 
       {/* A left rail, not a card. No box, no hover lift, no icon in a tinted
-          square — the same shape the portfolio lists its work in. */}
+          square. the same shape the portfolio lists its work in. */}
       <div>
         {tools.map((t) => (
           <div key={t.href} className="mb-7 border-l-2 border-accent pl-4">
