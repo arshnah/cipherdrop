@@ -55,14 +55,14 @@ export default function Cipherdrop() {
         </header>
 
         <section className="pb-16">
-          <div className="rounded-t-lg border border-b-0 border-line bg-surf2/40 flex items-center gap-2 px-4 py-2.5">
-            <span className="flex gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-bad/70" />
-              <span className="w-2.5 h-2.5 rounded-full bg-warn/70" />
-              <span className="w-2.5 h-2.5 rounded-full bg-accent/70" />
-            </span>
-            <span className="font-mono text-[12px] text-faint ml-1.5">~/cipherdrop</span>
-            <span className="ml-auto font-mono text-[11.5px] text-faint hidden sm:block">encrypt → link → decrypt</span>
+          {/* No fake macOS traffic lights. Three coloured dots are a picture of
+              a terminal drawn on top of something that is not one — decoration
+              standing where the real thing already is. A prompt line says the
+              same and is honest about it. */}
+          <div className="rounded-t border border-b-0 border-line bg-surf2/40 flex items-center gap-2 px-4 py-2.5 text-[12px] text-faint">
+            <span className="text-accent">$</span>
+            <span>~/cipherdrop</span>
+            <span className="ml-auto text-[11.5px] hidden sm:block">encrypt → link → decrypt</span>
           </div>
           <Create />
           <p className="mt-3 font-mono text-[12px] text-faint">the key lives after the # in your link and is generated on this device, never sent.</p>
